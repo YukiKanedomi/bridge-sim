@@ -14,6 +14,7 @@ const kisetsu = byCat('季節');
 const fukaki  = byCat('孵化器');
 const kyumin  = byCat('休眠');
 const jobsLive = D.jobs.filter(j => j.state === 'proposed' || j.state === 'queued');
+const jobsReview = D.jobs.filter(j => j.state === 'review');
 
 const SHORT = { 'engine-zukan':'図鑑', 'machikoba':'町工場', 'travel-itinerary':'旅行' };
 const short = n => SHORT[n] || (n.length > 8 ? n.slice(0, 7) + '…' : n);
@@ -110,7 +111,7 @@ function draw(t) {
   worker(88, F.f6 + 8, '#3a3028', '#48a048', true, tick);
   worker(104, F.f6 + 8, '#8c6838', '#e8883d', true, tick + 1);
   P(130, F.f6 + 6, 26, 14, '#e0d0a8'); P(132, F.f6 + 8, 22, 10, '#fbf0d8');
-  P(140, F.f6 + 2, 6, 4, jobsLive.length && tick % 2 ? '#e85838' : '#a85838'); // 検収・承認待ちランプ
+  P(140, F.f6 + 2, 6, 4, (jobsLive.length || jobsReview.length) && tick % 2 ? '#e85838' : '#a85838'); // 検収・承認待ちランプ
 
   // 5F 連載
   deskSlots.forEach((s, i) => {

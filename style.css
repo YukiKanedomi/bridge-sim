@@ -33,6 +33,7 @@ canvas { display:block; width:390px; height:600px; image-rendering:pixelated; cu
 .tag { display:inline-block; font-size:10px; background:#c8b078; color:#3a3028; border:1px solid #3a3028;
   padding:0 4px; margin-right:5px; }
 .tag.queued { background:#88c8e8; }
+.tag.review { background:#e8b858; }
 .tag.done { background:#88d888; }
 .blink { animation:bl 1s steps(1) infinite; }
 @keyframes bl { 50% { opacity:0; } }
