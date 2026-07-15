@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" shape-rendering="crispEdges">
+  <!-- 16/32px用の簡略版: 要素を減らし主役（ビル+旗）を大きく -->
+  <rect width="512" height="512" fill="#9cd4e4"/>
+  <!-- 旗（大きめ） -->
+  <rect x="112" y="32" width="24" height="96" fill="#4a3828"/>
+  <rect x="136" y="32" width="152" height="64" fill="#e85838"/>
+  <!-- パラペット -->
+  <rect x="80" y="112" width="352" height="24" fill="#4a3828"/>
+  <!-- 躯体 -->
+  <rect x="96" y="136" width="320" height="320" fill="#f0dcb0"/>
+  <rect x="384" y="136" width="32" height="320" fill="#b89058"/>
+  <!-- 窓 2列×2段（大きく） -->
+  <g fill="#38a8c8">
+    <rect x="144" y="176" width="88" height="88"/><rect x="280" y="176" width="88" height="88"/>
+    <rect x="144" y="304" width="88" height="88"/><rect x="280" y="304" width="88" height="88"/>
+  </g>
+  <!-- 地面 -->
+  <rect x="0" y="456" width="512" height="56" fill="#78b048"/>
+</svg>

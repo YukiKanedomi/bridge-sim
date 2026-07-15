@@ -308,6 +308,11 @@ window.BRIDGE_DATA = {
     },
     {
       "section": "見える化アプリBridge Sim",
+      "done": true,
+      "text": "v2: 名簿・クエスト帳タブ（2026-07-15）。クエスト帳のチェック/追加は端末メモ→「報告をコピー」でClaudeにround-trip（mdが正の原則を維持）"
+    },
+    {
+      "section": "見える化アプリBridge Sim",
       "done": false,
       "text": "データ更新の運用: 配員表/キュー更新のたび node scripts/build-data.mjs → bridge-sim を commit&push（自動化は次段）"
     },
@@ -318,8 +323,8 @@ window.BRIDGE_DATA = {
     },
     {
       "section": "見える化アプリBridge Sim",
-      "done": false,
-      "text": "PWA化（manifest+ホーム画面アイコン→app-iconスキル）"
+      "done": true,
+      "text": "アイコン一式＋manifest（2026-07-15 app-iconスキルで生成。ホーム画面追加に対応）"
     },
     {
       "section": "オートパイロット",
