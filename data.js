@@ -249,25 +249,11 @@ window.BRIDGE_DATA = {
   ],
   "jobs": [
     {
-      "id": "Q-001",
-      "title": "図鑑「今週の現場」欄の試作（カタログ14番）",
-      "state": "proposed",
-      "stateLabel": "承認待ち",
-      "meta": "派遣先: engine-zukan ／ リスク: 低 ／ サイズ: 1晩"
-    },
-    {
-      "id": "Q-002",
-      "title": "記憶の禅庭・減衰スコアの試作（カタログ17番の第一歩）",
-      "state": "proposed",
-      "stateLabel": "承認待ち",
-      "meta": "派遣先: Yorozuya/experiments/karesansui の系譜（新規は experiments/ 配下に隔離）／ リスク: 低 ／ サイズ: 1晩"
-    },
-    {
       "id": "Q-003",
       "title": "研究攻城戦・一晩版の試行（カタログ20番の縮小版）",
-      "state": "proposed",
-      "stateLabel": "承認待ち",
-      "meta": "派遣先: experts（gas-bearing か rotordynamics）／ リスク: 低 ／ サイズ: 1晩"
+      "state": "queued",
+      "stateLabel": "うんばん待ち",
+      "meta": "承認: 2026-07-15 社長（Q-001/002は見送り、本件のみ承認）"
     }
   ],
   "tasks": [
@@ -328,8 +314,8 @@ window.BRIDGE_DATA = {
     },
     {
       "section": "オートパイロット",
-      "done": false,
-      "text": "キュー初回承認（Q-001/002/003 が提案中）"
+      "done": true,
+      "text": "キュー初回承認（2026-07-15: Q-003承認・Q-001/002見送り）"
     },
     {
       "section": "オートパイロット",
