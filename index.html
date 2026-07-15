@@ -13,24 +13,44 @@
 <body>
 <div id="stage">
   <div id="topbar">
-    <span class="title">Bridgeビル</span>
+    <span class="title" id="toptitle">Bridgeビル</span>
     <span class="stat" id="topstat"></span>
   </div>
-  <div id="scene">
-    <canvas id="cv" width="195" height="300"></canvas>
-    <div id="labels"></div>
-  </div>
-  <div id="panel">
-    <div class="win" id="detail">
-      <h2 id="d-title">よみこみ中…</h2>
-      <div id="d-body"></div>
+
+  <!-- ビル -->
+  <div id="view-home" class="view">
+    <div id="scene">
+      <canvas id="cv" width="195" height="300"></canvas>
+      <div id="labels"></div>
     </div>
-    <div class="win" id="queuewin">
-      <h2>搬入コンベア</h2>
-      <div id="q-body"></div>
+    <div id="panel">
+      <div class="win" id="detail">
+        <h2 id="d-title">よみこみ中…</h2>
+        <div id="d-body"></div>
+      </div>
+      <div class="win" id="queuewin">
+        <h2>搬入コンベア</h2>
+        <div id="q-body"></div>
+      </div>
     </div>
-    <div id="foot">Bridgeグループ 経営ボード ／ データは配員表から自動生成（機微はマスク済み）</div>
   </div>
+
+  <!-- 名簿 -->
+  <div id="view-roster" class="view" hidden>
+    <div id="panel-roster" class="pagepanel"></div>
+  </div>
+
+  <!-- クエスト -->
+  <div id="view-quests" class="view" hidden>
+    <div id="panel-quests" class="pagepanel"></div>
+  </div>
+
+  <div id="foot">Bridgeグループ 経営ボード v2 ／ データは配員表から自動生成（機微はマスク済み）</div>
+  <nav id="tabs">
+    <button data-view="home" class="on">ビル</button>
+    <button data-view="roster">名簿</button>
+    <button data-view="quests">クエスト</button>
+  </nav>
 </div>
 <script src="data.js"></script>
 <script src="app.js"></script>

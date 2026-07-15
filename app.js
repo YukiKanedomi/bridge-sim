@@ -200,10 +200,11 @@ function draw(t) {
   }
 }
 
-// ---- 12fpsで回す（レトロ演出＆省電力） ----
+// ---- 12fpsで回す（レトロ演出＆省電力。ビル表示中のみ描画） ----
+let currentView = 'home';
 let last = 0;
 function loop(ms) {
-  if (ms - last > 80) { last = ms; draw(ms / 1000); }
+  if (currentView === 'home' && ms - last > 80) { last = ms; draw(ms / 1000); }
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
@@ -285,3 +286,175 @@ function select(kind, data) {
 
 // 初期選択: いちばん元気な連載、なければ本社
 select('project', rensai.slice().sort((a, b) => (b.energy ?? 0) - (a.energy ?? 0))[0] || hq || D.projects[0]);
+
+// ============================================================
+// タブ切替（ビル / 名簿 / クエスト）
+// ============================================================
+const VIEW_TITLES = { home: 'Bridgeビル', roster: 'グループ名簿', quests: 'クエスト帳' };
+function showView(v) {
+  if (!VIEW_TITLES[v]) v = 'home';
+  currentView = v;
+  ['home', 'roster', 'quests'].forEach(k => { $('view-' + k).hidden = (k !== v); });
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.view === v));
+  $('toptitle').textContent = VIEW_TITLES[v];
+  if (location.hash !== '#' + v) history.replaceState(null, '', '#' + v);
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll('#tabs button').forEach(b => b.addEventListener('click', () => showView(b.dataset.view)));
+window.addEventListener('hashchange', () => showView(location.hash.slice(1)));
+
+// ============================================================
+// 名簿ページ
+// ============================================================
+const CATCOLOR = { 基幹:'#4878c0', 連載:'#e8883d', 展示:'#8c68b8', 季節:'#38a0a0', 休眠:'#88807c', 孵化器:'#48a048' };
+const hash = s => { let h = 5381; for (const c of s) h = (h * 33 + c.charCodeAt(0)) >>> 0; return h; };
+
+function drawAvatar(canvas, p) {
+  canvas.width = 16; canvas.height = 16;
+  const a = canvas.getContext('2d');
+  const R = (x, y, w, h, c) => { a.fillStyle = c; a.fillRect(x, y, w, h); };
+  const shirt = p.name === 'bridge' ? '#8c3838' : (CATCOLOR[p.category] || '#c8b078');
+  const hair = HAIR[hash(p.name) % HAIR.length];
+  const sleeping = p.category.startsWith('休眠');
+  R(4, 1, 8, 4, hair); R(3, 3, 2, 3, hair); R(11, 3, 2, 3, hair);
+  R(4, 5, 8, 5, '#f0c8a0');
+  if (sleeping) { R(5, 7, 2, 1, '#3a3028'); R(9, 7, 2, 1, '#3a3028'); }
+  else { R(5, 6, 2, 2, '#3a3028'); R(9, 6, 2, 2, '#3a3028'); }
+  R(3, 10, 10, 6, shirt); R(5, 10, 6, 2, '#f0c8a0');
+}
+
+function buildRoster() {
+  const groups = [
+    ['本社', hq ? [hq] : []],
+    ['連載', rensai], ['基幹', kikan], ['季節', kisetsu],
+    ['展示', tenji], ['孵化器', fukaki], ['休眠', kyumin],
+  ].filter(([, arr]) => arr.length);
+  $('panel-roster').innerHTML = groups.map(([label, arr]) => `
+    <div class="win">
+      <h2>${label}　${arr.length}社</h2>
+      ${arr.map(p => `
+        <div class="prow" data-name="${esc(p.name)}">
+          <canvas></canvas>
+          <div class="info">
+            <div class="nm">${esc(p.name)}</div>
+            <div class="role">${esc(p.industry)}</div>
+          </div>
+          <div class="side">
+            <span class="ctag c${esc(p.category)}">${esc(p.category)}</span>
+            <div class="minibar"><i class="${p.category.startsWith('休眠') ? 'zzz' : (p.energy < 40 ? 'low' : '')}" style="width:${Math.max(p.energy ?? 6, 6)}%"></i></div>
+          </div>
+        </div>
+        <div class="pdetail" hidden>
+          <span class="k">自動航行</span> ${esc(p.autopilot)}${p.daysAgo != null ? `　<span class="k">最終活動</span> ${p.daysAgo}日前` : ''}<br>
+          ${esc(p.status)}<br>
+          <span class="k">次の一手</span> ${esc(p.next)}
+        </div>`).join('')}
+    </div>`).join('');
+  document.querySelectorAll('.prow').forEach(row => {
+    const p = D.projects.find(x => x.name === row.dataset.name);
+    drawAvatar(row.querySelector('canvas'), p);
+    row.addEventListener('click', () => { const d = row.nextElementSibling; d.hidden = !d.hidden; });
+  });
+}
+buildRoster();
+
+// ============================================================
+// クエスト帳（チェックは端末メモ → 「報告をコピー」でClaudeへ round-trip）
+// ============================================================
+const LS_CHECKS = 'bsim_checks', LS_ADDED = 'bsim_added';
+const store = k => { try { return JSON.parse(localStorage.getItem(k)) || (k === LS_ADDED ? [] : {}); } catch { return k === LS_ADDED ? [] : {}; } };
+const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+const taskId = t => 'T' + hash(t.section + t.text).toString(36);
+
+function buildQuests() {
+  const checks = store(LS_CHECKS);
+  const added = store(LS_ADDED);
+  const tasks = D.tasks || [];
+  const openTasks = tasks.filter(t => !t.done);
+  const doneTasks = tasks.filter(t => t.done);
+
+  const jobRow = j => {
+    const closed = j.state === 'done';
+    const memo = !!checks[j.id];
+    return `<div class="trow ${closed || memo ? 'dn' : ''}">
+      ${closed ? '<input type="checkbox" checked disabled>' : `<input type="checkbox" data-id="${esc(j.id)}" ${memo ? 'checked' : ''}>`}
+      <span class="txt"><span class="tag ${j.state}">${esc(j.stateLabel)}</span>${esc(j.id)} ${esc(j.title)}</span>
+    </div>`;
+  };
+  const taskRow = t => {
+    const id = taskId(t);
+    const memo = !!checks[id];
+    return `<div class="trow ${t.done || memo ? 'dn' : ''}">
+      ${t.done ? '<input type="checkbox" checked disabled>' : `<input type="checkbox" data-id="${esc(id)}" ${memo ? 'checked' : ''}>`}
+      <span class="txt">${esc(t.text)}<span class="sec">${esc(t.section)}</span></span>
+    </div>`;
+  };
+
+  $('panel-quests').innerHTML = `
+    <div class="win qsec">
+      <h2>クエスト（キュー）</h2>
+      ${D.jobs.map(jobRow).join('') || '<div class="row">キューは空です</div>'}
+    </div>
+    <div class="win qsec">
+      <h2>経営のやること</h2>
+      ${openTasks.map(taskRow).join('') || '<div class="row">未着手はありません</div>'}
+      ${doneTasks.length ? `<div class="note" style="margin-top:6px;">済み ${doneTasks.length}件は台帳に記録済み</div>` : ''}
+    </div>
+    <div class="win qsec">
+      <h2>ローカルメモ</h2>
+      ${added.map((m, i) => `<div class="trow"><input type="checkbox" checked disabled><span class="txt">${esc(m)}</span><button class="pixbtn" data-del="${i}">×</button></div>`).join('') || '<div class="note">思いついたやることをここに書き留め、下のボタンでまとめてClaudeへ。</div>'}
+      <div class="addrow"><input id="addinput" maxlength="120" placeholder="やることを追加（端末メモ）"><button class="pixbtn" id="addbtn">追加</button></div>
+    </div>
+    <div class="win qsec">
+      <h2>報告</h2>
+      <div class="note">チェックや追加はこの端末のメモです（台帳はまだ変わりません）。<br>「報告をコピー」→ Claudeに貼って一言で、正式に台帳へ反映されます。</div>
+      <div class="addrow"><button class="pixbtn orange" id="copybtn" style="flex:1;">報告をコピー</button></div>
+    </div>`;
+
+  $('panel-quests').querySelectorAll('input[type=checkbox][data-id]').forEach(cb =>
+    cb.addEventListener('change', () => {
+      const c = store(LS_CHECKS);
+      if (cb.checked) c[cb.dataset.id] = true; else delete c[cb.dataset.id];
+      save(LS_CHECKS, c); buildQuests();
+    }));
+  $('panel-quests').querySelectorAll('[data-del]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      const a = store(LS_ADDED); a.splice(Number(btn.dataset.del), 1); save(LS_ADDED, a); buildQuests();
+    }));
+  $('addbtn').addEventListener('click', () => {
+    const v = $('addinput').value.trim();
+    if (!v) return;
+    const a = store(LS_ADDED); a.push(v); save(LS_ADDED, a); buildQuests();
+  });
+  $('copybtn').addEventListener('click', copyReport);
+}
+
+function copyReport() {
+  const checks = store(LS_CHECKS);
+  const added = store(LS_ADDED);
+  const doneJobs = D.jobs.filter(j => checks[j.id]);
+  const doneTasks = (D.tasks || []).filter(t => !t.done && checks[taskId(t)]);
+  const lines = [`【Bridge Sim 報告 ${D.generatedAt}】`];
+  if (doneJobs.length || doneTasks.length) {
+    lines.push('対応済みにしたい:');
+    doneJobs.forEach(j => lines.push(`- ${j.id} ${j.title}`));
+    doneTasks.forEach(t => lines.push(`- [${t.section}] ${t.text}`));
+  }
+  if (added.length) {
+    lines.push('やることに追加したい:');
+    added.forEach(m => lines.push(`- ${m}`));
+  }
+  if (lines.length === 1) { lines.push('（メモはありません）'); }
+  const text = lines.join('\n');
+  const done = () => { $('copybtn').textContent = 'コピーしました！'; setTimeout(() => { $('copybtn').textContent = '報告をコピー'; }, 1600); };
+  if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(done);
+  else {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); ta.remove(); done();
+  }
+}
+buildQuests();
+
+// 初期ビュー（URLの#を尊重）
+showView(location.hash.slice(1) || 'home');

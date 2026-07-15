@@ -269,5 +269,72 @@ window.BRIDGE_DATA = {
       "stateLabel": "承認待ち",
       "meta": "派遣先: experts（gas-bearing か rotordynamics）／ リスク: 低 ／ サイズ: 1晩"
     }
+  ],
+  "tasks": [
+    {
+      "section": "経営",
+      "done": true,
+      "text": "初回経営会議（2026-07-15）: 方針書v1制定→v1.1改定（開発枠4〜5本）・配員表7/15実測・8PJローカルgit整備"
+    },
+    {
+      "section": "経営",
+      "done": false,
+      "text": "配員表の区分(仮)確定: Anima-Atlas=展示で確定済み(7/15)。gas-bearing-roadmap の要確認が残"
+    },
+    {
+      "section": "経営",
+      "done": false,
+      "text": "未コミット回収: paper-radar×2・travel-itinerary は解消確認済み(7/15)。残: qol-radar スクリプト2本・weekend-planner BACKLOG"
+    },
+    {
+      "section": "経営",
+      "done": false,
+      "text": "weekend-planner のクラウドRoutine未達（7/11代打）の原因調査"
+    },
+    {
+      "section": "見える化アプリBridge Sim",
+      "done": true,
+      "text": "①データスキーマ設計とJSON生成スクリプト（scripts/build-data.mjs）"
+    },
+    {
+      "section": "見える化アプリBridge Sim",
+      "done": true,
+      "text": "②ビジュアル3案（2026-07-15 A案採用）"
+    },
+    {
+      "section": "見える化アプリBridge Sim",
+      "done": true,
+      "text": "③実装 v1（タップ詳細・元気ゲージ・12fpsドット絵アニメ）"
+    },
+    {
+      "section": "見える化アプリBridge Sim",
+      "done": false,
+      "text": "データ更新の運用: 配員表/キュー更新のたび node scripts/build-data.mjs → bridge-sim を commit&push（自動化は次段）"
+    },
+    {
+      "section": "見える化アプリBridge Sim",
+      "done": false,
+      "text": "アセット作り込み（荷札つき荷箱・屋上BRIDGE看板・エレベーター・窓の質感1段）"
+    },
+    {
+      "section": "見える化アプリBridge Sim",
+      "done": false,
+      "text": "PWA化（manifest+ホーム画面アイコン→app-iconスキル）"
+    },
+    {
+      "section": "オートパイロット",
+      "done": false,
+      "text": "キュー初回承認（Q-001/002/003 が提案中）"
+    },
+    {
+      "section": "オートパイロット",
+      "done": false,
+      "text": "起動トリガーの設置（承認後。まずは1日1直から）"
+    },
+    {
+      "section": "オートパイロット",
+      "done": false,
+      "text": "初直の実施→航海日誌・報告フローの実地検証"
+    }
   ]
 };
